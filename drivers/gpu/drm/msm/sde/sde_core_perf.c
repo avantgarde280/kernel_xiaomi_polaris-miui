@@ -171,6 +171,15 @@ static void _sde_core_perf_calc_crtc(struct sde_kms *kms,
 		perf->core_clk_rate = kms->perf.fix_core_clk_rate;
 	}
 
+	trace_sde_perf_calc_crtc(crtc->base.id,
+			perf->bw_ctl[SDE_POWER_HANDLE_DBUS_ID_MNOC],
+			perf->bw_ctl[SDE_POWER_HANDLE_DBUS_ID_LLCC],
+			perf->bw_ctl[SDE_POWER_HANDLE_DBUS_ID_EBI],
+			perf->max_per_pipe_ib[SDE_POWER_HANDLE_DBUS_ID_MNOC],
+			perf->max_per_pipe_ib[SDE_POWER_HANDLE_DBUS_ID_LLCC],
+			perf->max_per_pipe_ib[SDE_POWER_HANDLE_DBUS_ID_EBI],
+			perf->core_clk_rate);
+
 	SDE_EVT32(crtc->base.id, perf->core_clk_rate);
 	trace_sde_perf_calc_crtc(crtc->base.id,
 			perf->bw_ctl[SDE_POWER_HANDLE_DBUS_ID_MNOC],
@@ -626,6 +635,12 @@ void sde_core_perf_crtc_update(struct drm_crtc *crtc,
 		new->max_per_pipe_ib[SDE_POWER_HANDLE_DBUS_ID_EBI],
 		new->core_clk_rate, stop_req,
 		update_bus, update_clk, params_changed);
+
+	trace_printk("crtc:%d ib_mnoc:%llu ib_llc:%llu ib_ebi:%llu\n",
+		crtc->base.id,
+		new->max_per_pipe_ib[SDE_POWER_HANDLE_DBUS_ID_MNOC],
+		new->max_per_pipe_ib[SDE_POWER_HANDLE_DBUS_ID_LLCC],
+		new->max_per_pipe_ib[SDE_POWER_HANDLE_DBUS_ID_EBI]);
 
 	for (i = 0; i < SDE_POWER_HANDLE_DBUS_ID_MAX; i++) {
 		if (update_bus & BIT(i))
