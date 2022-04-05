@@ -183,7 +183,7 @@ config IBM_BSR
 config POWERNV_OP_PANEL
 	tristate "IBM POWERNV Operator Panel Display support"
 	depends on PPC_POWERNV
-	default m
+	default y
 	help
 	  If you say Y here, a special character device node, /dev/op_panel,
 	  will be created which exposes the operator panel display on IBM
@@ -552,7 +552,7 @@ config MMTIMER
 config UV_MMTIMER
 	tristate "UV_MMTIMER Memory mapped RTC for SGI UV"
 	depends on X86_UV
-	default m
+	default y
 	help
 	  The uv_mmtimer device allows direct userspace access to the
 	  UV system timer.
