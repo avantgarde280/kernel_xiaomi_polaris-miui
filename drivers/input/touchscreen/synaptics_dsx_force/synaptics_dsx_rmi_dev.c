@@ -5,7 +5,6 @@
  *
  * Copyright (C) 2012 Alexandra Chin <alexandra.chin@tw.synaptics.com>
  * Copyright (C) 2012 Scott Lin <scott.lin@tw.synaptics.com>
- * Copyright (C) 2018 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +43,7 @@
 #include <linux/uaccess.h>
 #include <linux/cdev.h>
 #include <linux/platform_device.h>
-#include <linux/input/synaptics_dsx_force.h>
+#include <linux/input/synaptics_dsx.h>
 #include "synaptics_dsx_core.h"
 
 #define CHAR_DEVICE_NAME "rmi"
@@ -566,22 +565,15 @@ static ssize_t rmidev_read(struct file *filp, char __user *buf,
 		return -EBADF;
 	}
 
-	mutex_lock(&(dev_data->file_mutex));
-
-	if (*f_pos > REG_ADDR_LIMIT) {
-		retval = -EFAULT;
-		goto clean_up;
-	}
+	if (count == 0)
+		return 0;
 
 	if (count > (REG_ADDR_LIMIT - *f_pos))
 		count = REG_ADDR_LIMIT - *f_pos;
 
-	if (count == 0) {
-		retval = 0;
-		goto clean_up;
-	}
-
 	address = (unsigned short)(*f_pos);
+
+	mutex_lock(&(dev_data->file_mutex));
 
 	rmidev_allocate_buffer(count);
 
@@ -644,26 +636,19 @@ static ssize_t rmidev_write(struct file *filp, const char __user *buf,
 		return -EBADF;
 	}
 
-	mutex_lock(&(dev_data->file_mutex));
-
-	if (*f_pos > REG_ADDR_LIMIT) {
-		retval = -EFAULT;
-		goto unlock;
-	}
+	if (count == 0)
+		return 0;
 
 	if (count > (REG_ADDR_LIMIT - *f_pos))
 		count = REG_ADDR_LIMIT - *f_pos;
 
-	if (count == 0) {
-		retval = 0;
-		goto unlock;
-	}
+	mutex_lock(&(dev_data->file_mutex));
 
 	rmidev_allocate_buffer(count);
 
 	if (copy_from_user(rmidev->tmpbuf, buf, count)) {
+		mutex_unlock(&(dev_data->file_mutex));
 		return -EFAULT;
-		goto unlock;
 	}
 
 	retval = synaptics_rmi4_reg_write(rmidev->rmi4_data,
@@ -673,7 +658,6 @@ static ssize_t rmidev_write(struct file *filp, const char __user *buf,
 	if (retval >= 0)
 		*f_pos += retval;
 
-unlock:
 	mutex_unlock(&(dev_data->file_mutex));
 
 	return retval;
@@ -732,7 +716,7 @@ static int rmidev_release(struct inode *inp, struct file *filp)
 	if (dev_data->ref_count < 0)
 		dev_data->ref_count = 0;
 
-
+//	rmi4_data->reset_device(rmi4_data, false);
 	rmi4_data->irq_enable(rmi4_data, true, false);
 
 	rmi4_data->stay_awake = false;
