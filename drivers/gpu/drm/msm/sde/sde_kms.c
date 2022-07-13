@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2014-2021, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2021 XiaoMi, Inc.
  * Copyright (C) 2013 Red Hat
  * Author: Rob Clark <robdclark@gmail.com>
  *
@@ -1059,7 +1060,9 @@ static void sde_kms_complete_commit(struct msm_kms *kms,
 	}
 
 	for_each_crtc_in_state(old_state, crtc, old_crtc_state, i) {
+		SDE_ATRACE_BEGIN("sde_crtc_complete_commit");
 		sde_crtc_complete_commit(crtc, old_crtc_state);
+		SDE_ATRACE_END("sde_crtc_complete_commit");
 
 		/* complete secure transitions if any */
 		if (sde_kms->smmu_state.transition_type == POST_COMMIT)
@@ -1068,15 +1071,17 @@ static void sde_kms_complete_commit(struct msm_kms *kms,
 
 	for_each_connector_in_state(old_state, connector, old_conn_state, i) {
 		struct sde_connector *c_conn;
-
 		c_conn = to_sde_connector(connector);
 		if (!c_conn->ops.post_kickoff)
 			continue;
+		SDE_ATRACE_BEGIN("post_kickoff");
 		rc = c_conn->ops.post_kickoff(connector);
+		SDE_ATRACE_END("post_kickoff");
 		if (rc) {
 			pr_err("Connector Post kickoff failed rc=%d\n",
 					 rc);
 		}
+		sde_connector_fod_notify(connector);
 	}
 
 	sde_power_resource_enable(&priv->phandle, sde_kms->core_client, false);

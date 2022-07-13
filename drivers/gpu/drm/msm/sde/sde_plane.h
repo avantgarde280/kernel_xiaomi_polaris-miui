@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2021 XiaoMi, Inc.
  * Copyright (C) 2013 Red Hat
  * Author: Rob Clark <robdclark@gmail.com>
  *
@@ -349,5 +350,7 @@ bool sde_plane_is_sec_ui_allowed(struct drm_plane *plane);
  */
 void sde_plane_secure_ctrl_xin_client(struct drm_plane *plane,
 		struct drm_crtc *crtc);
+
+int sde_plane_check_fod_layer(const struct drm_plane_state *drm_state);
 
 #endif /* _SDE_PLANE_H_ */
