@@ -3,7 +3,7 @@ name: Beta Build Release
 
 on:
   push:
-    branches: [ * ]
+    branches: [ qdrm ]
 
 jobs:
   build:
