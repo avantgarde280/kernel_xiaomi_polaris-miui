@@ -3,7 +3,7 @@ name: Beta Build Release
 
 on:
   push:
-    branches: [ miui-s ]
+    branches: [ * ]
 
 jobs:
   build:
