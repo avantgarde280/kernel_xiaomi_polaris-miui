@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2015-2018 The Linux Foundation. All rights reserved.
- * Copyright (C) 2021 XiaoMi, Inc.
  * Copyright (C) 2013 Red Hat
  * Author: Rob Clark <robdclark@gmail.com>
  *
@@ -148,11 +147,24 @@ struct sde_crtc_event {
 	void (*cb_func)(struct drm_crtc *crtc, void *usr);
 	void *usr;
 };
-
+/**
+ * struct sde_crtc_fps_info - structure for measuring fps periodicity
+ * @frame_count		: Total frames during configured periodic duration
+ * @last_sampled_time_us: Stores the last ktime in microsecs when fps
+ *                        was calculated
+ * @measured_fps	: Last measured fps value
+ * @fps_periodic_duration	: Duration in milliseconds to measure the fps.
+ *                                Default value is 1 second.
+ * @time_buf		: Buffer for storing ktime of the commits
+ * @next_time_index	: index into time_buf for storing ktime for next commit
+ */
 struct sde_crtc_fps_info {
 	u32 frame_count;
 	ktime_t last_sampled_time_us;
 	u32 measured_fps;
+	u32 fps_periodic_duration;
+	ktime_t *time_buf;
+	u32 next_time_index;
 };
 
 /*
@@ -222,6 +234,7 @@ struct sde_crtc_fps_info {
  * @cur_perf      : current performance committed to clock/bandwidth driver
  * @rp_lock       : serialization lock for resource pool
  * @rp_head       : list of active resource pool
+ * @plane_mask_old: keeps track of the planes used in the previous commit
  */
 struct sde_crtc {
 	struct drm_crtc base;
@@ -299,9 +312,10 @@ struct sde_crtc {
 	struct mutex rp_lock;
 	struct list_head rp_head;
 
+	u32 plane_mask_old;
+
 	/* blob for histogram data */
 	struct drm_property_blob *hist_blob;
-	bool is_primary_sde_crtc;
 };
 
 #define to_sde_crtc(x) container_of(x, struct sde_crtc, base)
@@ -428,9 +442,6 @@ struct sde_crtc_state {
 	u64 sbuf_clk_rate[2];
 	bool sbuf_clk_shifted;
 
-	bool finger_down;
-	bool dim_layer_status;
-	struct sde_hw_dim_layer *fingerprint_dim_layer;
 	struct sde_crtc_respool rp;
 };
 
@@ -553,14 +564,6 @@ void sde_crtc_prepare_commit(struct drm_crtc *crtc,
  */
 void sde_crtc_complete_commit(struct drm_crtc *crtc,
 		struct drm_crtc_state *old_state);
-
-/**
- * sde_crtc_fod_ui_ready - callback to notify fod ui ready message
- * @crtc: Pointer to drm crtc object
- * @old_state: Pointer to drm crtc old state object
- */
-//void sde_crtc_fod_ui_ready(struct drm_crtc *crtc,
-//		struct drm_crtc_state *old_state);
 
 /**
  * sde_crtc_init - create a new crtc object
@@ -819,7 +822,5 @@ uint64_t sde_crtc_get_sbuf_clk(struct drm_crtc_state *state);
  * @frame_count: frame_count to be configured
  */
 void sde_crtc_misr_setup(struct drm_crtc *crtc, bool enable, u32 frame_count);
-
-uint32_t sde_crtc_get_mi_fod_sync_info(struct sde_crtc_state *cstate);
 
 #endif /* _SDE_CRTC_H_ */
