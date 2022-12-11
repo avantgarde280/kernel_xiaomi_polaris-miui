@@ -1,0 +1,40 @@
+# This is a basic workflow to help you get started with Actions
+name: Beta Build Release
+
+on:
+  push:
+    branches: [ miui-s ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout kernel source
+      uses: actions/checkout@v2
+
+    - name: Checkout zipper
+      uses: actions/checkout@v2
+      with:
+        repository: avantgarde280/AnyKernel3
+        path: zipper
+
+    - name: Android kernel build
+      uses: lemniskett/android-kernel-actions@master
+      id: build
+      env:
+        NAME: Miui-S-Kernel-Beta
+      with:
+        arch: arm64
+        compiler: proton-clang/master/binutils
+        defconfig: polaris_defconfig
+        image: Image.gz-dtb
+
+    - name: Release build
+      uses: appleboy/telegram-action@master
+      with:
+        to: "543221957" 
+        #${{ secrets.CHANNEL_ID }}
+        token: "2049951634:AAH9bKEiRZQdnTJ-EJm0U1O8H2WNa7R1KS8"
+        #${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: New Miui-S-kernel beta is now ready!, took ${{ steps.build.outputs.elapsed_time }} seconds to compiled
+        document: ${{ steps.build.outputs.outfile }}, out/.config, *.ko
