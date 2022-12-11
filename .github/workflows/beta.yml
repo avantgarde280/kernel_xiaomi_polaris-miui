@@ -25,7 +25,7 @@ jobs:
         NAME: Miui-S-Kernel-Beta
       with:
         arch: arm64
-        compiler: proron-clang/a389821/binutils
+        compiler: proton-clang/20210123/binutils
         defconfig: polaris_defconfig
         image: Image.gz-dtb
 
