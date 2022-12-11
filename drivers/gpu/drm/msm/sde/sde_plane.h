@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
- * Copyright (C) 2021 XiaoMi, Inc.
  * Copyright (C) 2013 Red Hat
  * Author: Rob Clark <robdclark@gmail.com>
  *
@@ -96,6 +95,7 @@ struct sde_plane_rot_state {
 #define SDE_PLANE_DIRTY_SHARPEN	0x4
 #define SDE_PLANE_DIRTY_PERF	0x8
 #define SDE_PLANE_DIRTY_FB_TRANSLATION_MODE	0x10
+#define SDE_PLANE_DIRTY_QOS     0x200
 #define SDE_PLANE_DIRTY_ALL	0xFFFFFFFF
 
 /**
@@ -351,6 +351,16 @@ bool sde_plane_is_sec_ui_allowed(struct drm_plane *plane);
 void sde_plane_secure_ctrl_xin_client(struct drm_plane *plane,
 		struct drm_crtc *crtc);
 
-int sde_plane_check_fod_layer(const struct drm_plane_state *drm_state);
+/*
+ * sde_plane_get_ubwc_error - gets the ubwc error code
+ * @plane: Pointer to DRM plane object
+ */
+u32 sde_plane_get_ubwc_error(struct drm_plane *plane);
+
+/*
+ * sde_plane_clear_ubwc_error - clears the ubwc error code
+ * @plane: Pointer to DRM plane object
+ */
+void sde_plane_clear_ubwc_error(struct drm_plane *plane);
 
 #endif /* _SDE_PLANE_H_ */
